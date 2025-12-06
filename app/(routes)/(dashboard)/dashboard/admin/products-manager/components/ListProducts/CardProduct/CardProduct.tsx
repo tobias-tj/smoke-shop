@@ -11,35 +11,34 @@ import {
   Wrench,
 } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { CardProductProps } from "./CardProduct.types";
 import { toast } from "sonner";
 
 export function CardProduct(props: CardProductProps) {
-  const { product } = props;
-  const router = useRouter();
+  const { product, onSuccess } = props;
 
   const deleteProduct = async () => {
     try {
-      await axios.delete(`/api/product/${product.id}`);
+      await axios.delete(`/api/products/${product.id}`);
       toast.success("Product deleted successfully");
-      router.refresh();
+      onSuccess?.();
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("Something went wrong!");`    `
     }
   };
 
   const handlerPublishProduct = async (publish: boolean) => {
     try {
-      await axios.patch(`/api/product/${product.id}`, { isPublish: publish });
-      if (publish) {
-        toast.info("Product Published 🤝");
-      } else {
-        toast.info("Product unpublish 🔧");
-      }
-      router.refresh();
+     const promise = () => new Promise((resolve) => setTimeout(() => resolve({ name: 'Sonner' }), 2000));
+      toast.promise(promise, {
+        loading: `${publish ? "Publishing" : "Unpublishing"} product...`,
+        success: `${publish ? "Published" : "Unpublished"} successfully!`,
+      })        
+      await axios.patch(`/api/products/${product.id}`, { isPublish: publish });
+      
+      onSuccess?.();
     } catch (error) {
       toast.error("Something went wrong!");
     }
@@ -108,10 +107,17 @@ export function CardProduct(props: CardProductProps) {
           <Button variant="destructive" className="flex-1 text-xs flex items-center justify-center gap-1">
             Delete <Trash className="w-3 h-3" />
           </Button>
-          <Button variant="secondary" className="flex-1 text-xs flex items-center justify-center gap-1">
-            {product.isActive ? "Unpublish" : "Publish"}{" "}
-            {product.isActive ? <Download className="w-3 h-3" /> : <Upload className="w-3 h-3" />}
-          </Button>
+          {product.isActive ?(
+            <Button variant="secondary" className="flex-1 text-xs flex items-center justify-center gap-1" onClick={() => handlerPublishProduct(false)}>
+            Unpublish
+            <Download className="w-3 h-3" />
+            </Button>
+                    ): (
+            <Button variant="secondary" className="flex-1 text-xs flex items-center justify-center gap-1" onClick={() => handlerPublishProduct(true)}>
+            Publish
+            <Upload className="w-3 h-3" />
+            </Button>
+          )}
         </div>
       </div>
     </div>

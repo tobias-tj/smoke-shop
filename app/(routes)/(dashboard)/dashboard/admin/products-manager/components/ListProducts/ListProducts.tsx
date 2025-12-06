@@ -10,6 +10,10 @@ export const ListProducts = forwardRef<{ refresh: () => void }, {}>((props, ref)
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const handleSuccess = () => {
+    loadProducts();
+  };
+
    const loadProducts = async () => {
     setLoading(true);
     try {
@@ -54,7 +58,7 @@ export const ListProducts = forwardRef<{ refresh: () => void }, {}>((props, ref)
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {products.map((p: Product) => (
-          <CardProduct key={p.id} product={p} />
+          <CardProduct key={p.id} product={p} onSuccess={handleSuccess} />
         ))}
       </div>
     </div>
