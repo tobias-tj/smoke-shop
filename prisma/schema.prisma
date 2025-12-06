@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+ provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//
+// ------------- USERS & ADDRESSES -------------
+//
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  phone     String?
+  role      UserRole @default(CLIENT)
+
+  addresses  Address[]
+  orders     Order[]
+  stockLogs  StockLog[] @relation("UserCreatedStockLogs")
+  orderHistoryChanges OrderHistory[] @relation("UserOrderHistoryChanges")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+enum UserRole {
+  ADMIN
+  CLIENT
+}
+
+model Address {
+  id            String    @id @default(uuid())
+  userId        String
+  street        String
+  neighborhood  String
+  reference     String?
+  city          String
+  latitude      Float?
+  longitude     Float?
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Inverse relation for Order.address
+  orders        Order[]
+
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+}
+
+//
+// ------------- PRODUCTS -------------
+//
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  category    ProductCategory
+  price       Decimal          @db.Decimal(10,2)
+  cost        Decimal?         @db.Decimal(10,2)
+  image       String?
+  isActive    Boolean          @default(true)
+
+  stock       Int              @default(0)
+  stockLogs   StockLog[]
+
+  orderItems  OrderItem[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+enum ProductCategory {
+  VAPE
+  ESSENCE
+  ACCESSORY
+  OTHER
+}
+
+//
+// ------------- INVENTORY LOGS -------------
+//
+
+model StockLog {
+  id          String              @id @default(uuid())
+  productId   String
+  quantity    Int
+  type        StockMovementType
+  reason      String?
+  createdById String?
+
+  product     Product             @relation(fields: [productId], references: [id])
+  
+  createdBy   User? @relation("UserCreatedStockLogs", fields: [createdById], references: [id])
+
+  createdAt   DateTime            @default(now())
+
+  @@index([productId])
+  @@index([createdById])
+}
+
+enum StockMovementType {
+  ADD
+  REMOVE
+  ORDER
+  CANCEL
+}
+
+//
+// ------------- ORDERS -------------
+//
+
+model Order {
+  id            String        @id @default(uuid())
+  userId        String
+  addressId     String
+  status        OrderStatus   @default(PENDING)
+  totalAmount   Decimal       @db.Decimal(10,2)
+
+  items         OrderItem[]
+  user          User          @relation(fields: [userId], references: [id])
+  address       Address       @relation(fields: [addressId], references: [id])
+
+  history       OrderHistory[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([addressId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  ON_THE_WAY
+  DELIVERED
+  CANCELED
+}
+
+//
+// ------------- ORDER ITEMS -------------
+//
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10,2)
+
+  order       Order    @relation(fields: [orderId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+//
+// ------------- ORDER HISTORY -------------
+//
+
+model OrderHistory {
+  id          String        @id @default(uuid())
+  orderId     String
+  changedById String?
+  oldStatus   OrderStatus?
+  newStatus   OrderStatus
+  note        String?
+
+  order       Order         @relation(fields: [orderId], references: [id])
+  changedBy   User?         @relation("UserOrderHistoryChanges", fields: [changedById], references: [id])
+
+  createdAt   DateTime      @default(now())
+
+  @@index([orderId])
+  @@index([changedById])
+}
+
