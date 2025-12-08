@@ -17,15 +17,19 @@ import { CardProductProps } from "./CardProduct.types";
 import { toast } from "sonner";
 
 export function CardProduct(props: CardProductProps) {
-  const { product, onSuccess } = props;
+  const { product, onSuccess, onEdit } = props;
 
   const deleteProduct = async () => {
     try {
+      const promise = () => new Promise((resolve) => setTimeout(() => resolve({ name: 'Sonner' }), 2000));
+      toast.promise(promise, {
+        loading: "Deleting product...",
+        success: "Product deleted successfully!",
+      })
       await axios.delete(`/api/products/${product.id}`);
-      toast.success("Product deleted successfully");
       onSuccess?.();
     } catch (error) {
-      toast.error("Something went wrong!");`    `
+      toast.error("Something went wrong!");
     }
   };
 
@@ -101,10 +105,15 @@ export function CardProduct(props: CardProductProps) {
 
         {/* ---------- Acciones ---------- */}
         <div className="mt-3 flex gap-1">
-          <Button variant="outline" className="flex-1 text-xs flex items-center justify-center gap-1">
+          <Button
+            variant="outline"
+            className="flex-1 text-xs flex items-center justify-center gap-1"
+            onClick={() => onEdit?.(product)}
+            >
             Edit <Edit className="w-3 h-3" />
-          </Button>
-          <Button variant="destructive" className="flex-1 text-xs flex items-center justify-center gap-1">
+            </Button>
+
+          <Button variant="destructive" className="flex-1 text-xs flex items-center justify-center gap-1" onClick={() => deleteProduct()}>
             Delete <Trash className="w-3 h-3" />
           </Button>
           {product.isActive ?(

@@ -1,27 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ButtonAddProduct } from "./components/ButtonAddProduct";
 import { FormAddProduct } from "./components/FormAddProduct";
+import { FormEditProduct } from "./components/FormEditProduct";
 import { motion } from "framer-motion";
 import { ListProducts } from "./components/ListProducts";
-import { useRef } from "react";
+import { Product } from "@prisma/client";
 
 export default function ProductsManagerPage() {
   const [showForm, setShowForm] = useState(false);
-    const listRef = useRef<{ refresh: () => void }>(null);
+  const [editProduct, setEditProduct] = useState(null);
 
-    const handleSuccess = () => {
+  const listRef = useRef<{ refresh: () => void }>(null);
+
+  const handleSuccess = () => {
     setShowForm(false);
+    setEditProduct(null);
     listRef.current?.refresh();
   };
 
+  const openCreateForm = () => {
+    setEditProduct(null);
+    setShowForm(true);
+  };
+
+  const openEditForm = (product: Product) => {
+    setEditProduct(product);
+    setShowForm(true);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Manage your products</h2>
-        <ButtonAddProduct onToggle={() => setShowForm((prev) => !prev)} showForm={showForm} />
+
+        {!showForm && (
+          <ButtonAddProduct onToggle={openCreateForm} showForm={showForm} />
+        )}
+
+        {showForm && (
+          <ButtonAddProduct
+            onToggle={() => { setShowForm(false); setEditProduct(null); }}
+            showForm={true}
+          />
+        )}
       </div>
 
       {showForm && (
@@ -31,10 +54,15 @@ export default function ProductsManagerPage() {
           transition={{ duration: 0.25 }}
           className="rounded-xl border p-6 bg-card shadow-sm"
         >
-          <FormAddProduct onSuccess={handleSuccess} />
+          {editProduct ? (
+            <FormEditProduct product={editProduct} onSuccess={handleSuccess} />
+          ) : (
+            <FormAddProduct onSuccess={handleSuccess} />
+          )}
         </motion.div>
       )}
-      <ListProducts ref={listRef}/>
+
+      <ListProducts ref={listRef} onEdit={openEditForm} />
     </div>
   );
 }

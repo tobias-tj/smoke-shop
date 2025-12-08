@@ -13,7 +13,7 @@ export const dataGeneralSidebar = [
     {
         icon: "/heartLogo.svg",
         title: "Loved Products",
-        href: "/loved-vapes"
+        href: "/loved-products"
     }
 ]
 
