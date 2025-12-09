@@ -5,11 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, User } from "lucide-react";
 import { UserButton, useAuth } from "@clerk/nextjs";
+import { useLovedProducts } from "@/hooks/useLovedProducts";
 // import { useLovedVapes } from "@/hooks/useLovedVapes";
 
 export function Navbar() {
 const { userId } = useAuth();
-//   const { lovedItems } = useLovedVapes();
+const { lovedItems } = useLovedProducts();
 
 
     return (
@@ -20,17 +21,16 @@ const { userId } = useAuth();
           <span className="text-xl font-bold">MyVapes</span>
         </Link>
         <div className="flex items-center justify-center gap-x-7">
-          <Link href="/vapes">List Vapes</Link>
+          <Link href="/products">List Products</Link>
           <Link href="/dashboard">Dashboard</Link>
           {userId ? (
             <>
-              <Link href="/loved-vapes">
+              <Link href="/loved-products">
                 <Heart
                   strokeWidth={1}
                   className={`cursor-pointer ${
-                    0 > 0 && "fill-black"
+                    lovedItems.length > 0 && "fill-black"
                   }`}
-                  // TODO: fix this
                 />
               </Link>
               <UserButton />
@@ -38,7 +38,7 @@ const { userId } = useAuth();
           ) : (
             <Link href="/sign-in" className="flex gap-x-3">
               <Button>
-                Login
+                Sign in
                 <User className="ml-2 w-4 h-4" />
               </Button>
             </Link>

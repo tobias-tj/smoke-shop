@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import { ShoppingCart, Tag, Heart, Eye, DollarSign, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,13 @@ import { motion } from "framer-motion";
 import { ListProductsProps } from "./ListProducts.types";
 import { useLovedProducts } from "@/hooks/useLovedProducts";
 import { Product } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 
-export function ListProducts({ products }: ListProductsProps) {
+export default function ListProducts({ products }: ListProductsProps) {
   const {addLovedItem, lovedItems, removeLovedItem } = useLovedProducts();
+  const router = useRouter();
+
 
 
   const likedProduct = (productId: string) => {
@@ -75,7 +77,7 @@ export function ListProducts({ products }: ListProductsProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="border border-gray-200 hover:shadow-md transition-shadow duration-300">
+              <Card className="cursor-pointer border border-gray-200 hover:shadow-md transition-shadow duration-300" onClick={() => router.push(`/dashboard/products/${product.id}`)}>
                 <div className="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden">
                   {product.image ? (
                     <Image
@@ -137,6 +139,7 @@ export function ListProducts({ products }: ListProductsProps) {
                   <Button
                     variant="outline"
                     className="flex-1 text-xs gap-1"
+                    onClick={() => router.push(`/dashboard/products/${product.id}`)}
                   >
                     <Eye className="w-4 h-4" />
                     View

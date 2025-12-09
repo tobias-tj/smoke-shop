@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { ListProducts } from "./components/ListProducts";
+import ListProducts from "./components/ListProducts/ListProducts";
 
 export default async function Dashboard() {
   
