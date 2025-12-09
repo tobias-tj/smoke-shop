@@ -8,10 +8,13 @@ import { ListProductsProps } from "./ListProducts.types";
 import { useLovedProducts } from "@/hooks/useLovedProducts";
 import { Product } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 
 export default function ListProducts({ products }: ListProductsProps) {
   const {addLovedItem, lovedItems, removeLovedItem } = useLovedProducts();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
   const router = useRouter();
 
 
@@ -27,6 +30,11 @@ export default function ListProducts({ products }: ListProductsProps) {
       addLovedItem(product);
     }
   }
+
+  const handleCardClick = (id: string) => {
+    setLoadingId(id);
+    router.push(`/dashboard/products/${id}`);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -77,7 +85,12 @@ export default function ListProducts({ products }: ListProductsProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="cursor-pointer border border-gray-200 hover:shadow-md transition-shadow duration-300" onClick={() => router.push(`/dashboard/products/${product.id}`)}>
+              <Card className="cursor-pointer border border-gray-200 hover:shadow-md transition-shadow duration-300" onClick={() => handleCardClick(product.id)}>
+                {loadingId === product.id && (
+                  <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
+                    <span className="text-black font-semibold">Loading...</span>
+                  </div>
+                )}
                 <div className="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden">
                   {product.image ? (
                     <Image
@@ -121,7 +134,10 @@ export default function ListProducts({ products }: ListProductsProps) {
                   <Button
                     variant="outline"
                     className="flex-1 text-xs gap-1"
-                    onClick={() => handleLikeProduct(product)}
+                    onClick={(e) =>{ 
+                      e.stopPropagation(); 
+                      handleLikeProduct(product)
+                    }}
                   >
                     <Heart className={`w-4 h-4 ${likedProduct(product.id) ? "fill-black" : ""}`} />
                     {likedProduct(product.id) ? "Saved" : "Save"}

@@ -25,13 +25,13 @@ console.log("PARAMS RAW:", JSON.stringify(params));
     take: 4,
   });
 
-  // const plainProduct = {
-  //   ...product,
-  //   price: Number(product.price),
-  //   cost: product.cost ? Number(product.cost) : null,
-  //   createdAt: product.createdAt.toISOString(),
-  //   updatedAt: product.updatedAt.toISOString(),
-  // };
+  const plainProduct = {
+    ...product,
+    price: Number(product.price),
+    cost: product.cost ? Number(product.cost) : null,
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
+  };
 
   // const relatedProducts = related.map((r) => ({
   //   ...r,
@@ -45,7 +45,7 @@ console.log("PARAMS RAW:", JSON.stringify(params));
         
         <ProductImage image={product.image} name={product.name} />
 
-        <ProductInfo product={product} />
+        <ProductInfo product={plainProduct} />
 
       </div>
 

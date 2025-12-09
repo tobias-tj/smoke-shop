@@ -1,6 +1,7 @@
+import { Product } from "@prisma/client";
 import ActionButtons from "./ActionButtons";
 
-export default function ProductInfo({ product }: { product: any }) {
+export default function ProductInfo({ product }: { product: Product }) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-4xl font-bold">{product.name}</h1>
@@ -11,7 +12,7 @@ export default function ProductInfo({ product }: { product: any }) {
 
       <div className="text-3xl font-bold text-black">${Number(product.price).toFixed(2)}</div>
 
-      <ActionButtons />
+      <ActionButtons product={product} />
     </div>
   );
 }
