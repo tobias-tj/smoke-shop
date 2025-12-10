@@ -31,8 +31,8 @@ export default function ListLovedProducts() {
           transition={{ duration: 0.4 }}
         >
           <Card
-            className="border border-gray-200 hover:shadow-md transition-shadow duration-300 cursor-pointer"
-            onClick={() => router.push(`/product/${product.id}`)}
+            className="border border-gray-200 hover:shadow-md transition-shadow duration-300 cursor-pointer mt-3"
+            onClick={() => router.push(`/dashboard/products/${product.id}`)}
           >
             {/* Imagen */}
             <div className="relative w-full h-48 bg-gray-100 rounded-t-lg overflow-hidden">

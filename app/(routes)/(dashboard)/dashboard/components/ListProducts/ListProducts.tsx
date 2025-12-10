@@ -9,13 +9,25 @@ import { useLovedProducts } from "@/hooks/useLovedProducts";
 import { Product } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@clerk/nextjs";
+import { DialogAddBuy } from "@/components/Shared/DialogAddBuy";
 
 
 export default function ListProducts({ products }: ListProductsProps) {
   const {addLovedItem, lovedItems, removeLovedItem } = useLovedProducts();
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
+  const [open, setOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [street, setStreet] = useState("");
+  const [streetError, setStreetError] = useState("");
+
   const router = useRouter();
+  const { userId } = useAuth();
+
 
 
 
@@ -34,6 +46,11 @@ export default function ListProducts({ products }: ListProductsProps) {
   const handleCardClick = (id: string) => {
     setLoadingId(id);
     router.push(`/dashboard/products/${id}`);
+  };
+
+  const onBuyNow = (product: Product) => {
+    setSelectedProduct(product);
+    setOpen(true);
   };
 
   return (
@@ -146,7 +163,10 @@ export default function ListProducts({ products }: ListProductsProps) {
                   <Button
                     variant="default"
                     className="flex-1 text-xs gap-1 bg-black text-white border-none hover:bg-gray-800 transition-colors"
-                  >
+                  onClick={(e) =>{
+                    e.stopPropagation();
+                    onBuyNow(product)
+                  } }>
                     <ShoppingCart className="w-4 h-4" />
                     Buy
                   </Button>
@@ -166,6 +186,30 @@ export default function ListProducts({ products }: ListProductsProps) {
           );
         })}
       </div>
+     <DialogAddBuy
+      open={open}
+      onOpenChange={setOpen}
+      product={selectedProduct}
+      onConfirm={async (street : string) => {
+        if (!selectedProduct) return;
+
+        try {
+          const response = await axios.post("/api/checkout", {
+            productId: selectedProduct.id,
+            productName: selectedProduct.name,
+            price: selectedProduct.price,
+            userId: userId,
+            street: street,
+          });
+
+          window.location.href = response.data.url;
+        } catch (error) {
+          console.error(error);
+          toast.error("Something went wrong");
+        }
+      }}
+    />
     </div>
+    
   );
 }

@@ -92,7 +92,7 @@ export function CardProduct(props: CardProductProps) {
               {product.category}
             </span>
             <span className="text-sm font-semibold text-indigo-600">
-              ${product.price}
+              ${Number(product.price).toFixed(2)}
             </span>
           </div>
         </div>

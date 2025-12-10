@@ -43,6 +43,7 @@ export default function ListProducts({ products }: ListProductsProps) {
             width={300}
             height={300}
             alt={p.name}
+            unoptimized
             className="rounded-md object-cover w-full h-56"
           />
 

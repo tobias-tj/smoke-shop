@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { UploadButton } from "@/utils/uploadthing";
 import {
   Form, FormField, FormControl, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
@@ -211,30 +210,56 @@ export function FormEditProduct({
             name="image"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Product Image</FormLabel>
-
-                {/* PREVIEW */}
-                {preview && (
-                  <div className="mb-3">
-                    <img
-                      src={preview}
-                      alt="Product preview"
-                      className="h-28 w-28 object-cover rounded-md border"
-                    />
-                  </div>
-                )}
-
                 <FormControl>
-                  <UploadButton
-                    className="rounded-lg bg-slate-600/20 text-slate-800 outline-dotted outline-3 outline-slate-800 p-2"
-                    endpoint="photo"
-                    onClientUploadComplete={(res) => {
-                      const newUrl = res?.[0].ufsUrl;
-                      form.setValue("image", newUrl);
-                      setPreview(newUrl);
-                    }}
-                    onUploadError={(err) => console.error(err)}
-                  />
+                  <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Product Image</FormLabel>
+
+                      {preview && (
+                        <div className="mb-3">
+                          <img
+                            src={preview}
+                            alt="Product preview"
+                            className="h-28 w-28 object-cover rounded-md border"
+                          />
+                        </div>
+                      )}
+
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="rounded-lg bg-slate-600/20 text-slate-800 outline-dotted outline-3 outline-slate-800 p-2"
+                          onChange={async (e) => {
+                            if (!e.target.files?.[0]) return;
+                            const file = e.target.files[0];
+
+                            const formData = new FormData();
+                            formData.append("file", file);
+
+                            try {
+                              const res = await fetch("/api/uploadthing", {
+                                method: "POST",
+                                body: formData,
+                              });
+                              const data = await res.json();
+                              form.setValue("image", data.url);
+                              setPreview(data.url);
+                            } catch (err) {
+                              console.error(err);
+                            }
+                          }}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 </FormControl>
 
                 <FormMessage />

@@ -19,7 +19,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Info } from "lucide-react";
 import { useState } from "react";
-import { UploadButton } from "@/utils/uploadthing";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -221,27 +220,46 @@ export function FormAddProduct({ onSuccess }: { onSuccess?: () => void }) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Product Image</FormLabel>
+
+                {photoUploaded ? (
+                  <div className="mb-2">
+                    <img src={field.value} className="h-28 w-28 object-cover rounded-md" />
+                    <p className="text-sm">Image Uploaded!</p>
+                  </div>
+                ) : null}
+
                 <FormControl>
-                 {photoUploaded ? (
-                  <p className="text-sm">Image Uploaded!</p>
-                 ): (
-                  <UploadButton
-                  className="rounded-lg bg-slate-600/20 text-slate-800 outline-dotted outline-3 outline-slate-800 p-2"
-                  endpoint="photo"
-                  onClientUploadComplete={(res) => {
-                    form.setValue("image", res?.[0].ufsUrl);
-                    setPhotoUploaded(true);
-                  }}
-                  onUploadError={(error) => {
-                    console.log(error);
-                  }}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="rounded-lg bg-slate-600/20 text-slate-800 outline-dotted outline-3 outline-slate-800 p-2"
+                    onChange={async (e) => {
+                      if (!e.target.files?.[0]) return;
+                      const file = e.target.files[0];
+
+                      const formData = new FormData();
+                      formData.append("file", file);
+
+                      try {
+                        const res = await fetch("/api/uploadthing", {
+                          method: "POST",
+                          body: formData,
+                        });
+                        const data = await res.json();
+                        form.setValue("image", data.url);
+                        setPhotoUploaded(true);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
                   />
-                 )}
                 </FormControl>
+
                 <FormMessage />
               </FormItem>
             )}
           />
+
 
           {/* ----------- SUBMIT BUTTON ----------- */}
           <Button type="submit" className="w-full mt-5" disabled={!isValid}>

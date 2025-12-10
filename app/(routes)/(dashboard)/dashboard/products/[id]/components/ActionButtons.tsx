@@ -1,12 +1,28 @@
 "use client";
 
+import { DialogAddBuy } from "@/components/Shared/DialogAddBuy";
 import { Button } from "@/components/ui/button";
 import { useLovedProducts } from "@/hooks/useLovedProducts";
 import { Product } from "@prisma/client";
 import { Heart, ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
+import axios from "axios";
+import { useAuth } from "@clerk/nextjs";
 
 export default function ActionButtons({ product }: { product: Product }) {
   const { addLovedItem, lovedItems, removeLovedItem } = useLovedProducts();
+  const { userId } = useAuth();
+
+
+    const [open, setOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+    const onBuyNow = (product: Product) => {
+    setSelectedProduct(product);
+    setOpen(true);
+  };
+  
 
   const likedProduct = (productId: string) =>
     lovedItems.some((item) => item.id === productId);
@@ -26,6 +42,7 @@ export default function ActionButtons({ product }: { product: Product }) {
         variant="default"
         size="lg"
         className="w-full flex items-center justify-center gap-2 bg-black text-white hover:bg-gray-800 transition"
+        onClick={() => onBuyNow(product)}
       >
         <ShoppingCart className="w-5 h-5" />
         Buy Now
@@ -45,6 +62,30 @@ export default function ActionButtons({ product }: { product: Product }) {
         <Heart className={`w-5 h-5 ${likedProduct(product.id) ? "fill-white" : ""}`} />
         {likedProduct(product.id) ? "Saved" : "Save"}
       </Button>
+
+      <DialogAddBuy
+      open={open}
+      onOpenChange={setOpen}
+      product={selectedProduct}
+      onConfirm={async (street : string) => {
+        if (!selectedProduct) return;
+
+        try {
+          const response = await axios.post("/api/checkout", {
+            productId: selectedProduct.id,
+            productName: selectedProduct.name,
+            price: selectedProduct.price,
+            userId: userId,
+            street: street,
+          });
+
+          window.location.href = response.data.url;
+        } catch (error) {
+          console.error(error);
+          toast.error("Something went wrong");
+        }
+      }}
+    />
     </div>
   );
 }

@@ -6,7 +6,6 @@ import RelatedSection from "./components/RelatedSection";
 import BackButton from "./components/BackButton";
 
 export default async function ProductDetailsPage({ params }: { params: { id: string }}) {
-console.log("PARAMS RAW:", JSON.stringify(params));
     
   const {id} = await params;
   
