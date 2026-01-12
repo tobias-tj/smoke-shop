@@ -18,6 +18,14 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     if (!street || street.trim() === "") return NextResponse.json({ error: "Missing street" }, { status: 400 });
 
+    const userExists = await db.user.findUnique({ where: { id: userId } });
+
+    if (!userExists) {
+      // Redirigir a after-signup si no existe
+      return NextResponse.json({ url: "/after-signup" });
+    }
+    
+
     // 1️⃣ Crear Address
     const address = await db.address.create({
       data: {

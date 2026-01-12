@@ -13,7 +13,7 @@ export default function LovedProductsPage() {
 
     return (
         <div>
-            <h1 className="text-2xl">Loved Products</h1>
+            <h1 className="text-2xl font-bold">Loved Products</h1>
 
             <ListLovedProducts />
         </div>

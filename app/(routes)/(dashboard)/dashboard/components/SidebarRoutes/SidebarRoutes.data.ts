@@ -28,4 +28,9 @@ export const dataAdminSidebar = [
     title: "Manage Checkout",
     href: "/dashboard/admin/buys-manager",
   },
+  {
+    icon: "/statistics-manager.svg",
+    title: "Manage Statistics",
+    href: "/dashboard/admin/statistics-manager",
+  }
 ];
